@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "strict": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true,
+    "moduleResolution": "NodeNext"
+  },
+  "include": [
+    "index.ts"
+  ]
+}

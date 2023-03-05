@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "tsx": "^3.12.3"
+  },
+  "dependencies": {
+    "signaling-peer-js": "^0.9.0"
+  }
+}
