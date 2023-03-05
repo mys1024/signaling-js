@@ -1,29 +1,5 @@
 import type { BSON } from 'bson'
 
-export interface Peer {
-  /**
-   * Peer's ID. The value should be an integer in the interval [1, 0x7F_FF_FF_FF].
-   */
-  pid: number
-
-  /**
-   * Expiration time.
-   */
-  exp: Date
-}
-
-export interface LocalizedPeer extends Peer {
-  /**
-   * Signal sequence number.
-   */
-  sigSeq: number
-
-  /**
-   * Peer's Websocket instance.
-   */
-  ws?: WebSocket
-}
-
 export enum SignalType {
   // agent signal type
   INIT,
@@ -62,7 +38,6 @@ export interface BasicSignal {
 export interface InitSignal extends BasicSignal {
   typ: SignalType.INIT
   pid: number
-  token: string
 }
 
 export interface ResSignal extends BasicSignal {
@@ -91,3 +66,9 @@ export type AgentSignal =
 export type PeerSignal = DataSendSignal
 
 export type Signal = AgentSignal | PeerSignal
+
+export type InitSignalListener = (signal: InitSignal) => void
+
+export type ResSignalListener = (signal: ResSignal) => void
+
+export type DataListener = (data: DataRecvSignal['data'], from: number) => void

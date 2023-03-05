@@ -3,18 +3,16 @@ import { BSON } from 'bson'
 
 import type {
   AgentSignal,
-  DataRecvSignal,
+  DataListener,
   InitSignal,
+  InitSignalListener,
   ResSignal,
+  ResSignalListener,
   SignalData,
   SignalRes,
 } from './types'
 import { SignalType } from './types'
 import { newDataSendSignal } from './dao/signal'
-
-type InitSignalListener = (signal: InitSignal) => void
-type ResSignalListener = (signal: ResSignal) => void
-type DataListener = (data: DataRecvSignal['data'], from: number) => void
 
 export class SignalingPeer {
   #seq = 1
