@@ -28,7 +28,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/example.ts",
     "build": "tsup src/index.ts --dts --format cjs,esm --clean",
     "test": "vitest",
     "test:cover": "vitest --coverage",
