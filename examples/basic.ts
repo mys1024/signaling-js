@@ -1,4 +1,6 @@
-import { SignalingPeer } from './node'
+import { SignalingPeer } from '../src/node'
+
+console.log(123)
 
 async function example() {
   const peer1 = new SignalingPeer('ws://127.0.0.1/ws')

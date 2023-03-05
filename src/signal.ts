@@ -1,8 +1,8 @@
 import type {
   DataSendSignal,
   SignalData,
-} from '../types'
-import { SignalType } from '../types'
+} from './types'
+import { SignalType } from './types'
 
 export function newDataSendSignal(
   seq: number,

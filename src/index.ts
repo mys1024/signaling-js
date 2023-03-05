@@ -11,7 +11,7 @@ import type {
   SignalRes,
 } from './types'
 import { SignalType } from './types'
-import { newDataSendSignal } from './dao/signal'
+import { newDataSendSignal } from './signal'
 
 export class SignalingPeer {
   #seq = 1
