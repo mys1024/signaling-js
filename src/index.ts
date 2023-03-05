@@ -1,4 +1,3 @@
-import NodeWebSocket from 'ws'
 import { BSON } from 'bson'
 
 import type {
@@ -18,7 +17,7 @@ type DataListener = (data: DataRecvSignal['data'], from: number) => void
 
 export class SignalingPeer {
   #seq = 1
-  #ws: NodeWebSocket
+  #ws: WebSocket
   #wsReady: Promise<void>
   #pid: Promise<number>
   #initSignalListeners = new Set<InitSignalListener>()
@@ -26,8 +25,10 @@ export class SignalingPeer {
   #dataListeners = new Set<DataListener>()
 
   constructor(agentAddr: string) {
-    this.#ws = new NodeWebSocket(agentAddr)
-    this.#wsReady = new Promise<void>(resolve => this.#ws.on('open', () => resolve()))
+    this.#ws = new WebSocket(agentAddr)
+    this.#wsReady = new Promise<void>((resolve) => {
+      this.#ws.addEventListener('open', () => resolve())
+    })
     this.#pid = new Promise<number>((resolve) => {
       const listener = (signal: InitSignal) => {
         this.#removeInitSignalListener(listener)
@@ -35,7 +36,8 @@ export class SignalingPeer {
       }
       this.#addInitSignalListener(listener)
     })
-    this.#ws.on('message', (data) => {
+    this.#ws.addEventListener('message', (e) => {
+      const data = e.data
       // deserialize agent signal
       if (!(data instanceof Uint8Array))
         throw new Error('Invalid agent signal.')

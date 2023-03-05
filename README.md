@@ -1,16 +1,6 @@
-# starter-node-package
+# signaling-js
 
-A starter template for Node.js package.
-
-## Features
-
-- [pnpm](https://pnpm.io/)
-
-- [Vitest](https://vitest.dev/)
-
-- [tsup](https://tsup.egoist.dev/)
-
-- [ESLint](https://eslint.org/)
+A JavaScript peer-side library of [Signaling](https://github.com/mys1024/signaling).
 
 ## License
 
