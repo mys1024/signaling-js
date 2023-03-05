@@ -6,7 +6,7 @@
     "strict": true,
     "esModuleInterop": true,
     "strictNullChecks": true,
-    "moduleResolution": "Node"
+    "moduleResolution": "NodeNext"
   },
   "include": [
     "src/**/*.ts"
