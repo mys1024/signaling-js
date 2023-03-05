@@ -34,12 +34,12 @@ export class SignalingPeer {
       }
       this.#addInitSignalListener(listener)
     })
-    this.#ws.addEventListener('message', (e) => {
+    this.#ws.addEventListener('message', async (e) => {
       const data = e.data
       // deserialize agent signal
-      if (!(data instanceof Uint8Array))
+      if (!(data instanceof Blob))
         throw new Error('Invalid agent signal.')
-      const agentSignal = BSON.deserialize(data) as AgentSignal
+      const agentSignal = BSON.deserialize(new Uint8Array(await data.arrayBuffer())) as AgentSignal
       // handle init signal
       if (agentSignal.typ === SignalType.INIT) {
         for (const listener of this.#initSignalListeners)
