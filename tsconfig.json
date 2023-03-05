@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "module": "ESNext",
-    "target": "ES2019",
-    "lib": ["ESNext"],
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
     "strict": true,
     "esModuleInterop": true,
     "strictNullChecks": true,

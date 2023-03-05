@@ -3,9 +3,11 @@
     "source.fixAll.eslint": true
   },
   "cSpell.words": [
+    "BSON",
     "changelogithub",
     "pnpm",
     "pnpx",
-    "tsup"
+    "tsup",
+    "w3cwebsocket"
   ]
 }
