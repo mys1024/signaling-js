@@ -10,9 +10,9 @@ import type {
   ResSignalListener,
   SignalData,
   SignalRes,
-} from './types'
-import { SignalType } from './types'
-import { newDataSendSignal } from './signal'
+} from './types.js'
+import { SignalType } from './types.js'
+import { newDataSendSignal } from './signal.js'
 
 export class SignalingPeer {
   #seq = 1
