@@ -1,15 +1,15 @@
 {
-  "name": "signaling-js",
+  "name": "signaling-peer-js",
   "type": "module",
   "version": "0.0.1",
   "packageManager": "pnpm@7.28.0",
   "description": "A JavaScript peer-side library of Signaling.",
   "author": "mys1024",
   "license": "MIT",
-  "homepage": "https://github.com/mys1024/signaling-js#readme",
+  "homepage": "https://github.com/mys1024/signaling-peer-js#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mys1024/signaling-js.git"
+    "url": "https://github.com/mys1024/signaling-peer-js.git"
   },
   "keywords": [
     "signaling",
