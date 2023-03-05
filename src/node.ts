@@ -37,7 +37,8 @@ export class SignalingPeer {
       }
       this.#addInitSignalListener(listener)
     })
-    this.#ws.addEventListener('message', (data) => {
+    this.#ws.addEventListener('message', (e) => {
+      const data = e.data
       // deserialize agent signal
       if (!(data instanceof Uint8Array))
         throw new Error('Invalid agent signal.')
