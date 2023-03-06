@@ -14,6 +14,8 @@ import type {
 import { SignalType } from './types.js'
 import { newDataSendSignal } from './signal.js'
 
+export { BSON } from 'bson'
+
 export class SignalingPeer {
   #seq = 1
   #ws: NodeWebSocket
