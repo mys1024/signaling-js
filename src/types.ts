@@ -38,6 +38,7 @@ export interface BasicSignal {
 export interface InitSignal extends BasicSignal {
   typ: SignalType.INIT
   pid: number
+  token: string
 }
 
 export interface ResSignal extends BasicSignal {

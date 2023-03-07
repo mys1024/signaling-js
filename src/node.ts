@@ -19,24 +19,25 @@ export { BSON } from 'bson'
 export class SignalingPeer {
   #seq = 1
   #ws: NodeWebSocket
-  #wsReady: Promise<void>
   #pid: Promise<number>
+  #token: Promise<string>
   #initSignalListeners = new Set<InitSignalListener>()
   #resSignalListeners = new Set<ResSignalListener>()
   #dataListeners = new Set<DataListener>()
 
   constructor(agentAddr: string) {
-    this.#ws = new NodeWebSocket(agentAddr)
-    this.#wsReady = new Promise<void>((resolve) => {
-      this.#ws.addEventListener('open', () => resolve())
-    })
-    this.#pid = new Promise<number>((resolve) => {
+    const initSig = new Promise<InitSignal>((resolve) => {
       const listener = (signal: InitSignal) => {
         this.#removeInitSignalListener(listener)
-        resolve(signal.pid)
+        resolve(signal)
       }
       this.#addInitSignalListener(listener)
     })
+
+    this.#pid = new Promise(resolve => initSig.then(s => resolve(s.pid)))
+    this.#token = new Promise(resolve => initSig.then(s => resolve(s.token)))
+
+    this.#ws = new NodeWebSocket(agentAddr)
     this.#ws.addEventListener('message', (e) => {
       const data = e.data
       // deserialize agent signal
@@ -62,7 +63,7 @@ export class SignalingPeer {
   }
 
   async send(to: number, data: SignalData): Promise<SignalRes> {
-    await this.#wsReady
+    await this.#pid // wait before receiving init signal
     const seq = this.#seq++
     this.#ws.send(BSON.serialize(
       newDataSendSignal(seq, to, data),
@@ -80,6 +81,10 @@ export class SignalingPeer {
 
   async getPid() {
     return await this.#pid
+  }
+
+  async getToken() {
+    return await this.#token
   }
 
   addDataListener(listener: DataListener) {
