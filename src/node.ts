@@ -21,6 +21,7 @@ export class SignalingPeer {
   #ws: NodeWebSocket
   #pid: Promise<number>
   #token: Promise<string>
+  #exp: Promise<Date>
   #initSignalListeners = new Set<InitSignalListener>()
   #resSignalListeners = new Set<ResSignalListener>()
   #dataListeners = new Set<DataListener>()
@@ -36,6 +37,7 @@ export class SignalingPeer {
 
     this.#pid = new Promise(resolve => initSig.then(s => resolve(s.pid)))
     this.#token = new Promise(resolve => initSig.then(s => resolve(s.token)))
+    this.#exp = new Promise(resolve => initSig.then(s => resolve(s.exp)))
 
     this.#ws = new NodeWebSocket(agentAddr)
     this.#ws.addEventListener('message', (e) => {
@@ -85,6 +87,10 @@ export class SignalingPeer {
 
   async getToken() {
     return await this.#token
+  }
+
+  async getExp() {
+    return await this.#exp
   }
 
   addDataListener(listener: DataListener) {

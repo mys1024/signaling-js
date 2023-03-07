@@ -39,6 +39,7 @@ export interface InitSignal extends BasicSignal {
   typ: SignalType.INIT
   pid: number
   token: string
+  exp: Date
 }
 
 export interface ResSignal extends BasicSignal {
