@@ -1,4 +1,4 @@
-import { SignalingPeer } from '../../src/node.js'
+import { SignalingPeer } from 'signaling-peer-js/node'
 
 const signalingAgentAddr = 'ws://127.0.0.1/ws'
 

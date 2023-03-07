@@ -1,11 +1,11 @@
 lockfileVersion: 5.4
 
 specifiers:
-  signaling-peer-js: ^0.9.2
+  signaling-peer-js: ^0.9.4
   tsx: ^3.12.3
 
 dependencies:
-  signaling-peer-js: 0.9.2
+  signaling-peer-js: 0.9.4
 
 devDependencies:
   tsx: 3.12.3
@@ -282,8 +282,8 @@ packages:
     resolution: {integrity: sha512-0Gdjo/9+FzsYhXCEFueo2aY1z1tpXrxWZzP7k8ul9qt1U5o8rYJwTJYmaeHdrVosYIVYkOy2iwCJ9FdpocJhPQ==}
     dev: true
 
-  /signaling-peer-js/0.9.2:
-    resolution: {integrity: sha512-nqK6Sz8PpbBClA6wmNR1NdW/3QfH3erp7vmrWyvq7tLylj3ApxVszfx87eGMYLc+eCmf24+YoSSLByRRi+Lkfg==}
+  /signaling-peer-js/0.9.4:
+    resolution: {integrity: sha512-xx6ngFmy0adLFTkVTFRcHnAhxfaGj4xUgQPXYfRFk8iBwLBhyuTG8XctjZueyJNQ7eRpQSpZrnjmis+LB5sLtw==}
     dependencies:
       bson: 5.0.1
       ws: 8.12.1
