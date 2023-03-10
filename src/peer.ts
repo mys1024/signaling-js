@@ -12,7 +12,7 @@ import type {
   SignalDataReceiptStatus,
 } from './types/signal.js'
 import { AgentSignalType } from './types/signal.js'
-import { bsonDataSendSignal } from './utils/signal.js'
+import { bsonCloseSignal, bsonDataSendSignal, bsonRenewalSignal } from './utils/signal.js'
 
 type AgentSignalListener<T extends AgentSignalType> = (signal: Extract<Signal, { typ: T }>) => void
 type RemovableAgentSignalListener<T extends AgentSignalType> = (signal: Extract<Signal, { typ: T }>) => boolean
@@ -34,6 +34,7 @@ export class SignalingPeer {
   #pid: number | Promise<number>
   #token: string | Promise<string>
   #exp: Date | Promise<Date>
+  #closed = false
 
   constructor(agentAddr: string) {
     const wsConstructor = SignalingPeer._wsConstructor
@@ -54,19 +55,11 @@ export class SignalingPeer {
     this.#exp = new Promise(resolve => firstConfSignal.then(s => resolve(s.exp)))
 
     this.#ws.addMessageListener(async (data) => {
-      // deserialize agent signal
-      // TODO: type check
-      const agentSignal = BSON.deserialize(data) as AgentSignal
-      // call listeners
-      for (const listener of this.#listenerRegistry[agentSignal.typ])
+      const agentSignal = BSON.deserialize(data) as AgentSignal // TODO: type check
+      for (const listener of this.#listenerRegistry[agentSignal.typ]) {
         // @ts-expect-error it's ok
         listener(agentSignal)
-    })
-
-    this.#addAgentSignalListener(AgentSignalType.CONF, (signal) => {
-      this.#pid = signal.pid
-      this.#token = signal.token
-      this.#exp = signal.exp
+      }
     })
   }
 
@@ -87,6 +80,27 @@ export class SignalingPeer {
     })
   }
 
+  async renewal() {
+    this.#ws.send(bsonRenewalSignal(this.#seq++))
+    const confSignal = await new Promise<ConfSignal>((resolve) => {
+      this.#addRemovableAgentSignalListener(AgentSignalType.CONF, (signal) => {
+        resolve(signal)
+        return true
+      })
+    })
+    this.#pid = confSignal.pid
+    this.#token = confSignal.token
+    this.#exp = confSignal.exp
+  }
+
+  async close(deregister = true) {
+    this.#ws.send(bsonCloseSignal(this.#seq++, deregister))
+    await new Promise<void>((resolve) => {
+      this.#ws.addCloseListener(() => resolve())
+    })
+    this.#closed = true
+  }
+
   async getPid() {
     return await this.#pid
   }
@@ -97,6 +111,10 @@ export class SignalingPeer {
 
   async getExp() {
     return await this.#exp
+  }
+
+  isClosed() {
+    return this.#closed
   }
 
   addDataSignalListener(listener: AgentSignalListener<AgentSignalType.DATA_RECV>) {

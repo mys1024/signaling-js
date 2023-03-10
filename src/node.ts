@@ -7,16 +7,17 @@ import { toUint8Array } from './utils/plain.js'
 SignalingPeer._wsConstructor = (wsAddr) => {
   const ws = new NodeWebSocket(wsAddr)
   return {
-    send(data) {
-      ws.send(data)
-    },
+    send(data) { ws.send(data) },
     addMessageListener(listener) {
       ws.addEventListener('message', async (event) => {
         const data = await toUint8Array(event.data)
         if (!data)
-          throw new Error('Cannot convert message event\' data to Uint8Array.')
+          throw new Error('Cannot convert message data to Uint8Array.')
         listener(data)
       })
+    },
+    addCloseListener(listener) {
+      ws.addEventListener('close', () => listener())
     },
   }
 }
