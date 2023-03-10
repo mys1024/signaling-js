@@ -11,7 +11,7 @@ SignalingPeer._wsConstructor = (wsAddr) => {
       ws.addEventListener('message', async (event) => {
         const data = await toUint8Array(event.data)
         if (!data)
-          throw new Error('Cannot convert message event\' data to Uint8Array.')
+          throw new Error('Cannot convert message data to Uint8Array.')
         listener(data)
       })
     },
