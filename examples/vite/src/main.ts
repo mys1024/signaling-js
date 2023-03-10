@@ -20,7 +20,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 const signalingAgentAddr = 'ws://localhost/ws'
 
 const peer = new SignalingPeer(signalingAgentAddr)
-peer.addDataListener((data, from) => {
+peer.addDataSignalListener(({ from, data }) => {
   const logEl = document.createElement('div')
   logEl.innerText = `from: ${from}, data: ${data}`
   document.querySelector<HTMLInputElement>('#logs')!.appendChild(logEl)

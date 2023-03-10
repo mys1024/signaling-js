@@ -1,13 +1,13 @@
 lockfileVersion: 5.4
 
 specifiers:
-  signaling-peer-js: ^0.9.4
+  signaling-peer-js: ^0.10.0
   typescript: ^4.9.5
   vite: ^4.1.4
   vite-plugin-top-level-await: ^1.3.0
 
 dependencies:
-  signaling-peer-js: 0.9.4
+  signaling-peer-js: 0.10.0
 
 devDependencies:
   typescript: 4.9.5
@@ -431,8 +431,8 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /signaling-peer-js/0.9.4:
-    resolution: {integrity: sha512-xx6ngFmy0adLFTkVTFRcHnAhxfaGj4xUgQPXYfRFk8iBwLBhyuTG8XctjZueyJNQ7eRpQSpZrnjmis+LB5sLtw==}
+  /signaling-peer-js/0.10.0:
+    resolution: {integrity: sha512-G7p5IQhFWZwljlxP2FBzJJtnSjEdRlF9uMiMKuR4gV0wZ5B2Rd7NHF1ypYVZM/EH6VE0SPNlWbNt1I5bZUm2aA==}
     dependencies:
       bson: 5.0.1
       ws: 8.12.1
