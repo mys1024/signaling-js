@@ -2,7 +2,7 @@ import { BSON } from 'bson'
 import NodeWebSocket from 'ws'
 
 import { SignalingPeer } from './peer.js'
-import { toUint8Array } from './utils.js'
+import { toUint8Array } from './utils/plain.js'
 
 SignalingPeer._wsConstructor = (wsAddr) => {
   const ws = new NodeWebSocket(wsAddr)

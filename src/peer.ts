@@ -1,84 +1,89 @@
 import { BSON } from 'bson'
 
 import type {
-  AgentSignal,
   ConstrainedWebSocket,
   ConstrainedWebSocketConstructor,
-  DataListener,
-  InitSignal,
-  InitSignalListener,
-  ResSignal,
-  ResSignalListener,
+} from './types/ws.js'
+import type {
+  AgentSignal,
+  ConfSignal,
+  Signal,
   SignalData,
-  SignalRes,
-} from './types.js'
-import { SignalType } from './types.js'
-import { newDataSendSignal } from './signal.js'
+  SignalDataReceiptStatus,
+} from './types/signal.js'
+import { AgentSignalType } from './types/signal.js'
+import { bsonDataSendSignal } from './utils/signal.js'
+
+type AgentSignalListener<T extends AgentSignalType> = (signal: Extract<Signal, { typ: T }>) => void
+type RemovableAgentSignalListener<T extends AgentSignalType> = (signal: Extract<Signal, { typ: T }>) => boolean
+type AgentSignalListenerRegistry = {
+  [T in AgentSignalType]: Set<AgentSignalListener<T>>
+}
 
 export class SignalingPeer {
   static _wsConstructor: ConstrainedWebSocketConstructor | undefined
+
+  #listenerRegistry: AgentSignalListenerRegistry = {
+    [AgentSignalType.CONF]: new Set(),
+    [AgentSignalType.DATA_RECV]: new Set(),
+    [AgentSignalType.DATA_RECEIPT]: new Set(),
+  }
+
   #seq = 1
   #ws: ConstrainedWebSocket
-  #pid: Promise<number>
-  #token: Promise<string>
-  #exp: Promise<Date>
-  #initSignalListeners = new Set<InitSignalListener>()
-  #resSignalListeners = new Set<ResSignalListener>()
-  #dataListeners = new Set<DataListener>()
+  #pid: number | Promise<number>
+  #token: string | Promise<string>
+  #exp: Date | Promise<Date>
 
   constructor(agentAddr: string) {
     const wsConstructor = SignalingPeer._wsConstructor
     if (!wsConstructor)
       throw new Error('Please define SignalingPeer._wsConstructor before creating instances.')
 
-    const initSig = new Promise<InitSignal>((resolve) => {
-      const listener = (signal: InitSignal) => {
-        this.#removeInitSignalListener(listener)
+    this.#ws = wsConstructor(agentAddr)
+
+    const firstConfSignal = new Promise<ConfSignal>((resolve) => {
+      this.#addRemovableAgentSignalListener(AgentSignalType.CONF, (signal) => {
         resolve(signal)
-      }
-      this.#addInitSignalListener(listener)
+        return true
+      })
     })
 
-    this.#pid = new Promise(resolve => initSig.then(s => resolve(s.pid)))
-    this.#token = new Promise(resolve => initSig.then(s => resolve(s.token)))
-    this.#exp = new Promise(resolve => initSig.then(s => resolve(s.exp)))
+    this.#pid = new Promise(resolve => firstConfSignal.then(s => resolve(s.pid)))
+    this.#token = new Promise(resolve => firstConfSignal.then(s => resolve(s.token)))
+    this.#exp = new Promise(resolve => firstConfSignal.then(s => resolve(s.exp)))
 
-    this.#ws = wsConstructor(agentAddr)
     this.#ws.addMessageListener(async (data) => {
       // deserialize agent signal
+      // TODO: type check
       const agentSignal = BSON.deserialize(data) as AgentSignal
-      // handle init signal
-      if (agentSignal.typ === SignalType.INIT) {
-        for (const listener of this.#initSignalListeners)
-          listener(agentSignal)
-      }
-      // handle data_recv signal
-      if (agentSignal.typ === SignalType.DATA_RECV) {
-        for (const listener of this.#dataListeners)
-          listener(agentSignal.data, agentSignal.from)
-      }
-      // handle res signal
-      if (agentSignal.typ === SignalType.RES) {
-        for (const listener of this.#resSignalListeners)
-          listener(agentSignal)
-      }
+      // call listeners
+      for (const listener of this.#listenerRegistry[agentSignal.typ])
+        // @ts-expect-error it's ok
+        listener(agentSignal)
+    })
+
+    this.#addAgentSignalListener(AgentSignalType.CONF, (signal) => {
+      this.#pid = signal.pid
+      this.#token = signal.token
+      this.#exp = signal.exp
     })
   }
 
-  async send(to: number, data: SignalData): Promise<SignalRes> {
-    await this.#pid // wait before receiving init signal
+  async send(to: number, data: SignalData): Promise<SignalDataReceiptStatus> {
+    // wait until ready
+    await this.#pid
+    // send data
     const seq = this.#seq++
-    this.#ws.send(BSON.serialize(
-      newDataSendSignal(seq, to, data),
-    ))
-    return new Promise<SignalRes>((resolve) => {
-      const resSigListener = (signal: ResSignal) => {
+    this.#ws.send(bsonDataSendSignal(seq, to, data))
+    // listen for receipt
+    return new Promise<SignalDataReceiptStatus>((resolve) => {
+      this.#addRemovableAgentSignalListener(AgentSignalType.DATA_RECEIPT, (signal) => {
         if (signal.ack !== seq)
-          return
-        this.#removeResSignalListener(resSigListener)
-        resolve(signal.res)
-      }
-      this.#addResSignalListener(resSigListener)
+          return false
+        resolve(signal.sta)
+        return true
+      })
     })
   }
 
@@ -94,27 +99,28 @@ export class SignalingPeer {
     return await this.#exp
   }
 
-  addDataListener(listener: DataListener) {
-    this.#dataListeners.add(listener)
+  addDataSignalListener(listener: AgentSignalListener<AgentSignalType.DATA_RECV>) {
+    this.#addAgentSignalListener(AgentSignalType.DATA_RECV, listener)
   }
 
-  removeDataListener(listener: DataListener) {
-    this.#dataListeners.delete(listener)
+  removeDataSignalListener(listener: AgentSignalListener<AgentSignalType.DATA_RECV>) {
+    this.#removeAgentSignalListener(AgentSignalType.DATA_RECV, listener)
   }
 
-  #addInitSignalListener(listener: InitSignalListener) {
-    this.#initSignalListeners.add(listener)
+  #addAgentSignalListener<T extends AgentSignalType>(type: T, listener: AgentSignalListener<T>) {
+    this.#listenerRegistry[type].add(listener)
   }
 
-  #removeInitSignalListener(listener: InitSignalListener) {
-    this.#initSignalListeners.delete(listener)
+  #removeAgentSignalListener<T extends AgentSignalType>(type: T, listener: AgentSignalListener<T>) {
+    this.#listenerRegistry[type].delete(listener)
   }
 
-  #addResSignalListener(listener: ResSignalListener) {
-    this.#resSignalListeners.add(listener)
-  }
-
-  #removeResSignalListener(listener: ResSignalListener) {
-    this.#resSignalListeners.delete(listener)
+  #addRemovableAgentSignalListener<T extends AgentSignalType>(type: T, listener: RemovableAgentSignalListener<T>) {
+    const _listener: AgentSignalListener<T> = (signal) => {
+      const shouldRemove = listener(signal)
+      if (shouldRemove)
+        this.#removeAgentSignalListener(type, _listener)
+    }
+    this.#addAgentSignalListener(type, _listener)
   }
 }
