@@ -11,7 +11,7 @@ npm i signaling-peer-js
 ## Import
 
 ```javascript
-// for browser:
+// for runtimes with WebSocket defined (e.g. Browser, Deno):
 import { SignalingPeer } from 'signaling-peer-js'
 // for Node.js:
 import { SignalingPeer } from 'signaling-peer-js/node'
